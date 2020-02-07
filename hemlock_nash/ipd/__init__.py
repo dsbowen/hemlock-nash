@@ -4,7 +4,7 @@ from hemlock_nash import Payoff, Strategy
 
 @Payoff.register
 def matrix(game, payoff_matrix):
-    return payoff_matrix[tuple(p.strategy() for p in game.players)]
+    return payoff_matrix[tuple(p.actions[-1] for p in game.players)]
 
 @Strategy.register
 def tit_for_tat(player, first_action='Cooperate'):
