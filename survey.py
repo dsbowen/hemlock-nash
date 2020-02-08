@@ -14,7 +14,7 @@ PAYOFF_MATRIX = {
 }
 # probability of 'noise'; i.e. player will deviate from prescribed strategy
 P_NOISE = .2 
-ROUNDS = 10
+ROUNDS = 5
 
 def noisy_tft(player):
     """Tit for tat with noise"""
