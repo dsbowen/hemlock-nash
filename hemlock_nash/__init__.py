@@ -62,7 +62,10 @@ class Game(Base, db.Model):
         super().__init__()
         return kwargs
 
-    def play(self):
+    def play(self, rounds=1):
+        [self._play() for i in range(rounds)]
+
+    def _play(self):
         actions = [p.strategy() for p in self.players]
         [p.actions.append(a) for p, a in zip(self.players, actions)]
         payoffs = self.payoff_function()
@@ -72,8 +75,13 @@ class Game(Base, db.Model):
             cum_payoff = p.cum_payoffs[-1] if p.cum_payoffs else 0
             p.cum_payoffs.append(cum_payoff + payoff)
         self.rounds += 1
+
+    def rewind(self, rounds=1):
+        [p.rewind(rounds) for p in self.players]
+        self.rounds -= rounds
     
-    def html_table(self):
+    def html_table(self, rounds=None):
+        self._table_rounds = rounds or self.rounds
         game_table = read_file('game_table.html')
         return game_table.format(game=self)
 
@@ -91,7 +99,7 @@ class Game(Base, db.Model):
     def _stats(self):
         round_stats = read_file('round_stats.html')
         stats = ''
-        for i in range(self.rounds):
+        for i in range(self._table_rounds):
             self._round = i
             stats += round_stats.format(game=self)
         return stats
@@ -135,6 +143,11 @@ class Player(Base, db.Model):
         self.actions, self.payoffs, self.cum_payoffs = [], [], []
         super().__init__()
         return {'game': game, **kwargs}
+
+    def rewind(self, rounds=1):
+        del self.actions[-rounds:]
+        del self.payoffs[-rounds:]
+        del self.cum_payoffs[-rounds:]
 
 
 class Strategy(FunctionMixin, Base, db.Model):
